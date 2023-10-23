@@ -696,13 +696,12 @@ pub struct GetRawTransactionResult {
     pub version: u32,
     pub locktime: u32,
     pub vin: Vec<GetRawTransactionResultVin>,
+    #[serde(skip_deserializing)]
     pub vout: Vec<GetRawTransactionResultVout>,
     pub blockhash: Option<bitcoin::BlockHash>,
     pub confirmations: Option<u32>,
     pub time: Option<usize>,
     pub blocktime: Option<usize>,
-    #[serde(skip_deserializing)]
-    _skip_deserialization: (),
 }
 
 #[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
