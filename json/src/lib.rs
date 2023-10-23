@@ -82,6 +82,7 @@ pub mod serde_bch {
     use std::str::FromStr;
 
     use crate::serde::ser::Error;
+    use bitcoincash::consensus::encode::deserialize as bch_deserialize;
     use bitcoincash::Address as BchAddress;
     use cashaddr::convert::from_legacy;
     use cashaddr::convert::to_legacy;
@@ -100,6 +101,10 @@ pub mod serde_bch {
     }
 
     pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<BchAddress>, D::Error> {
+        //let bch_ans = bch_deserialize(d);
+        print!("here!!!!");
+        println!("Type of D: {}", std::any::type_name::<D>());
+        dbg!("Type of D: {}", std::any::type_name::<D>());
         let bch_addresses: String = ::serde::Deserialize::deserialize(d)?;
         let addresses: Vec<BchAddress> = bch_addresses
             .split(",")
@@ -135,6 +140,7 @@ pub mod serde_bch_opt {
     pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Option<BchAddress>, D::Error> {
         let bch_address: Option<String> = ::serde::Deserialize::deserialize(d)?;
 
+        dbg!(&bch_address);
         if let Some(addr_str) = bch_address {
             let legacy_address = to_legacy(&addr_str).as_deref().unwrap().to_string();
             let bch_addr = BchAddress::from_str(&legacy_address).unwrap();
