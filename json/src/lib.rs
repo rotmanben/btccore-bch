@@ -662,6 +662,8 @@ pub struct GetRawTransactionResultVoutScriptPubKey {
     // Added in Bitcoin Core 22
     #[serde(skip_deserializing)]
     pub address: Option<Address<NetworkUnchecked>>,
+    #[serde(skip_deserializing)]
+    _skip_deserialization: (),
 }
 
 impl GetRawTransactionResultVoutScriptPubKey {
@@ -698,6 +700,8 @@ pub struct GetRawTransactionResult {
     pub confirmations: Option<u32>,
     pub time: Option<usize>,
     pub blocktime: Option<usize>,
+    #[serde(skip_deserializing)]
+    _skip_deserialization: (),
 }
 
 #[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
