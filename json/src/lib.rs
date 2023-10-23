@@ -691,6 +691,7 @@ pub struct GetRawTransactionResult {
     pub txid: bitcoin::Txid,
     pub hash: bitcoin::Wtxid,
     pub size: usize,
+    #[serde(skip_deserializing)]
     pub vsize: usize,
     pub version: u32,
     pub locktime: u32,
