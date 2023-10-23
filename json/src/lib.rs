@@ -657,11 +657,11 @@ pub struct GetRawTransactionResultVoutScriptPubKey {
     #[serde(rename = "type")]
     pub type_: Option<ScriptPubkeyType>,
     // Deprecated in Bitcoin Core 22
-    #[serde(skip)]
+    #[serde(skip_deserializing)]
     pub addresses: Vec<Address<NetworkUnchecked>>,
     // Added in Bitcoin Core 22
-    #[serde(skip)]
-    pub address: Option<BchAddress>,
+    #[serde(skip_deserializing)]
+    pub address: Option<Address<NetworkUnchecked>>,
 }
 
 impl GetRawTransactionResultVoutScriptPubKey {
