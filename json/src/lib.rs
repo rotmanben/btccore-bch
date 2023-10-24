@@ -118,7 +118,7 @@ pub mod serde_bch {
             where
                 A: SeqAccess<'de>,
             {
-                let mut addresses = Vec::new();
+                let mut addresses: Vec<BchAddress> = Vec::new();
 
                 while let Some(addr_str) = seq.next_element::<String>()? {
                     let bch_addr =
