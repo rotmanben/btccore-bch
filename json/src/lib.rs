@@ -90,6 +90,8 @@ pub mod serde_bch {
     use serde::{Deserializer, Serializer};
 
     pub fn serialize<S: Serializer>(addresses: &Vec<BchAddress>, s: S) -> Result<S::Ok, S::Error> {
+        dbg!("ser here 2!!!!");
+        println!("ser here 2!!!!");
         let addresses_str: Vec<String> =
             addresses.iter().map(|addr| BchAddress::to_string(addr)).collect();
         let bch_addresses: Vec<String> = addresses_str
@@ -100,6 +102,8 @@ pub mod serde_bch {
     }
 
     pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<BchAddress>, D::Error> {
+        dbg!("des here 2!!!!");
+        println!("des here 2!!!!");
         let bch_addresses: Vec<String> = ::serde::Deserialize::deserialize(d)?;
         let addresses: Vec<BchAddress> = bch_addresses
             .iter()
@@ -137,6 +141,8 @@ pub mod serde_bch_opt {
     use serde::{Deserializer, Serializer};
 
     pub fn serialize<S: Serializer>(address: &Option<BchAddress>, s: S) -> Result<S::Ok, S::Error> {
+        dbg!("ser here 1!!!!");
+        println!("ser here 1!!!!");
         if let Some(addr) = address {
             let addr_str = BchAddress::to_string(addr);
             let bch_address = from_legacy(&addr_str, "bitcoincash").as_deref().unwrap().to_string();
@@ -147,6 +153,8 @@ pub mod serde_bch_opt {
     }
 
     pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Option<BchAddress>, D::Error> {
+        dbg!("des here 1!!!!");
+        println!("des here 1!!!!");
         let bch_address: Option<String> = ::serde::Deserialize::deserialize(d)?;
 
         if let Some(addr_str) = bch_address {
