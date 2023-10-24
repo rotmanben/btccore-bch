@@ -89,6 +89,9 @@ pub mod serde_bch {
     use serde::Serialize;
     use serde::{Deserializer, Serializer};
 
+    use serde::de::{self, SeqAccess, Visitor};
+    use serde::Deserialize;
+
     pub fn serialize<S: Serializer>(addresses: &Vec<BchAddress>, s: S) -> Result<S::Ok, S::Error> {
         dbg!("ser here 2!!!!");
         println!("ser here 2!!!!");
@@ -102,30 +105,34 @@ pub mod serde_bch {
     }
 
     pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<BchAddress>, D::Error> {
-        dbg!("des here 2!!!!");
-        println!("des here 2!!!!");
-        let bch_addresses: Vec<String> = ::serde::Deserialize::deserialize(d)?;
-        let addresses: Vec<BchAddress> = bch_addresses
-            .iter()
-            .map(|addr| {
-                let legacy_address = to_legacy(&addr.to_string()).as_deref().unwrap().to_string();
-                BchAddress::from_str(&legacy_address).unwrap()
-            })
-            .collect();
-        Ok(addresses)
-    }
+        struct BchAddressSeqVisitor;
 
-    //pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<BchAddress>, D::Error> {
-    //    let mut seq = d.deserialize_seq(None)?;
-    //    let addresses = seq
-    //        .into_iter()
-    //        .map(|addr: String| {
-    //            BchAddress::from_str(&to_legacy(&addr.to_string()).as_deref().unwrap().to_string())
-    //                .unwrap()
-    //        })
-    //        .collect();
-    //    Ok(addresses)
-    //}
+        impl<'de> Visitor<'de> for BchAddressSeqVisitor {
+            type Value = Vec<BchAddress>;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("a sequence of BchAddress")
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                let mut addresses = Vec::new();
+
+                while let Some(addr_str) = seq.next_element::<String>()? {
+                    let bch_addr =
+                        BchAddress::from_str(&to_legacy(&addr_str).as_deref().unwrap().to_string())
+                            .unwrap();
+                    addresses.push(bch_addr);
+                }
+
+                Ok(addresses)
+            }
+        }
+
+        d.deserialize_seq(BchAddressSeqVisitor)
+    }
 }
 
 // not this
