@@ -105,6 +105,7 @@ pub mod serde_bch {
     }
 
     pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<BchAddress>, D::Error> {
+        println!("des here 2!!!!");
         struct BchAddressSeqVisitor;
 
         impl<'de> Visitor<'de> for BchAddressSeqVisitor {
@@ -121,6 +122,7 @@ pub mod serde_bch {
                 let mut addresses: Vec<BchAddress> = Vec::new();
 
                 while let Some(addr_str) = seq.next_element::<String>()? {
+                    println!("addr_str!!!: {}", addr_str);
                     let bch_addr =
                         BchAddress::from_str(&to_legacy(&addr_str).as_deref().unwrap().to_string())
                             .unwrap();
