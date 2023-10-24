@@ -100,17 +100,31 @@ pub mod serde_bch {
     }
 
     pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<BchAddress>, D::Error> {
-        let bch_addresses: String = ::serde::Deserialize::deserialize(d)?;
+        let bch_addresses: Vec<String> = ::serde::Deserialize::deserialize(d)?;
         let addresses: Vec<BchAddress> = bch_addresses
-            .split(",")
+            .iter()
             .map(|addr| {
-                BchAddress::from_str(&to_legacy(&addr.to_string()).as_deref().unwrap().to_string())
-                    .unwrap()
+                let legacy_address = to_legacy(&addr.to_string()).as_deref().unwrap().to_string();
+                BchAddress::from_str(&legacy_address).unwrap()
             })
             .collect();
         Ok(addresses)
     }
+
+    //pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<BchAddress>, D::Error> {
+    //    let mut seq = d.deserialize_seq(None)?;
+    //    let addresses = seq
+    //        .into_iter()
+    //        .map(|addr: String| {
+    //            BchAddress::from_str(&to_legacy(&addr.to_string()).as_deref().unwrap().to_string())
+    //                .unwrap()
+    //        })
+    //        .collect();
+    //    Ok(addresses)
+    //}
 }
+
+// not this
 pub mod serde_bch_opt {
     use std::str::FromStr;
 
