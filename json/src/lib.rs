@@ -82,15 +82,15 @@ pub mod serde_bch {
     use std::str::FromStr;
 
     use crate::serde::ser::Error;
+    use bitcoin::address::Address as BtcAddress;
     use bitcoincash::Address as BchAddress;
     use cashaddr::convert::from_legacy;
     use cashaddr::convert::to_legacy;
     use serde::de::Error as ser_err;
-    use serde::Serialize;
-    use serde::{Deserializer, Serializer};
-
     use serde::de::{self, SeqAccess, Visitor};
     use serde::Deserialize;
+    use serde::Serialize;
+    use serde::{Deserializer, Serializer};
 
     pub fn serialize<S: Serializer>(addresses: &Vec<BchAddress>, s: S) -> Result<S::Ok, S::Error> {
         dbg!("ser here 2!!!!");
@@ -676,8 +676,9 @@ pub struct GetRawTransactionResultVoutScriptPubKey {
     #[serde(with = "serde_bch")]
     pub addresses: Vec<BchAddress>,
     // Added in Bitcoin Core 22
-    #[serde(with = "serde_bch_opt")]
-    pub address: Option<BchAddress>,
+    //#[serde(with = "serde_bch_opt")]
+    #[serde(skip_deserializing)]
+    pub address: Option<Address>,
 }
 
 impl GetRawTransactionResultVoutScriptPubKey {
