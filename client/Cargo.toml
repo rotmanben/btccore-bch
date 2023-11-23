@@ -1,5 +1,5 @@
 [package]
-name = "bitcoincore-rpc-bch"
+name = "bitcoincore-rpc"
 version = "0.17.0"
 authors = [
     "Steven Roose <steven@stevenroose.org>",
@@ -15,7 +15,7 @@ readme = "README.md"
 edition = "2018"
 
 [lib]
-name = "bitcoincore_rpc_bch"
+name = "bitcoincore_rpc"
 path = "src/lib.rs"
 
 [dependencies]
