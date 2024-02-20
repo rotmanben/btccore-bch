@@ -91,45 +91,78 @@ pub mod serde_bch {
     use serde::Deserialize;
     use serde::Serialize;
     use serde::{Deserializer, Serializer};
+    use std::fmt;
 
-    pub fn serialize<S: Serializer>(addresses: &Vec<BchAddress>, s: S) -> Result<S::Ok, S::Error> {
-        let addresses_str: Vec<String> =
-            addresses.iter().map(|addr| BchAddress::to_string(addr)).collect();
-        let bch_addresses: Vec<String> = addresses_str
-            .iter()
-            .map(|addr| to_legacy(&addr.to_string()).as_deref().unwrap().to_string())
-            .collect();
-        s.serialize_str(&bch_addresses.join(",")).map_err(S::Error::custom)
+    pub fn serialize<S: Serializer>(
+        addresses_option: &Option<Vec<BchAddress>>,
+        s: S,
+    ) -> Result<S::Ok, S::Error> {
+        match addresses_option {
+            Some(addresses) => {
+                let addresses_str: Vec<String> =
+                    addresses.iter().map(BchAddress::to_string).collect();
+                let bch_addresses: Vec<String> = addresses_str
+                    .iter()
+                    .map(|addr| to_legacy(addr).as_deref().unwrap_or_default().to_string())
+                    .collect();
+
+                s.serialize_str(&bch_addresses.join(","))
+            }
+            None => s.serialize_str(""),
+        }
+        .map_err(S::Error::custom)
     }
 
-    pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<BchAddress>, D::Error> {
+    pub fn deserialize<'de, D: Deserializer<'de>>(
+        d: D,
+    ) -> Result<Option<Vec<BchAddress>>, D::Error> {
         struct BchAddressSeqVisitor;
 
         impl<'de> Visitor<'de> for BchAddressSeqVisitor {
-            type Value = Vec<BchAddress>;
+            type Value = Option<Vec<BchAddress>>;
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                formatter.write_str("a sequence of BchAddress")
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a sequence of BchAddress or null")
             }
 
             fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
             where
                 A: SeqAccess<'de>,
             {
-                let mut addresses: Vec<BchAddress> = Vec::new();
+                let mut addresses = Vec::new();
 
                 while let Some(addr_str) = seq.next_element::<String>()? {
                     let bch_addr =
-                        BchAddress::from_str(&to_legacy(&addr_str).as_deref().unwrap().to_string())
-                            .unwrap();
+                        BchAddress::from_str(&to_legacy(&addr_str).as_deref().unwrap_or_default())
+                            .map_err(serde::de::Error::custom)?;
                     addresses.push(bch_addr);
                 }
 
-                Ok(addresses)
+                if addresses.is_empty() {
+                    Ok(None)
+                } else {
+                    Ok(Some(addresses))
+                }
+            }
+
+            // Implement handling for a potential null value
+            fn visit_none<E>(self) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok(None)
+            }
+
+            fn visit_unit<E>(self) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok(None)
             }
         }
 
-        d.deserialize_seq(BchAddressSeqVisitor)
+        // Adjust the deserialization call to handle the Option type
+        d.deserialize_option(BchAddressSeqVisitor)
     }
 }
 
@@ -666,11 +699,11 @@ pub struct GetRawTransactionResultVoutScriptPubKey {
     pub type_: Option<ScriptPubkeyType>,
     // Deprecated in Bitcoin Core 22
     #[serde(with = "serde_bch")]
-    pub addresses: Vec<BchAddress>,
+    pub addresses: Option<Vec<BchAddress>>,
     // Added in Bitcoin Core 22
-    //#[serde(with = "serde_bch_opt")]
-    #[serde(skip_deserializing)]
-    pub address: Option<Address>,
+    #[serde(with = "serde_bch_opt")]
+    //#[serde(skip_deserializing)]
+    pub address: Option<BchAddress>,
 }
 
 impl GetRawTransactionResultVoutScriptPubKey {
