@@ -701,13 +701,11 @@ pub struct GetRawTransactionResultVoutScriptPubKey {
     pub type_: Option<ScriptPubkeyType>,
     // Deprecated in Bitcoin Core 22
     //#[serde(with = "serde_bch")]
-    #[serde(skip_deserializing)]
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, skip_deserializing)]
     pub addresses: Option<Vec<BchAddress>>,
     // Added in Bitcoin Core 22
     //#[serde(with = "serde_bch_opt")]
-    #[serde(skip_deserializing)]
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, skip_deserializing)]
     pub address: Option<BchAddress>,
 }
 
@@ -740,7 +738,9 @@ pub struct GetRawTransactionResult {
     pub vsize: usize,
     pub version: u32,
     pub locktime: u32,
+    #[serde(skip_serializing, skip_deserializing)]
     pub vin: Vec<GetRawTransactionResultVin>,
+    #[serde(skip_serializing, skip_deserializing)]
     pub vout: Vec<GetRawTransactionResultVout>,
     pub blockhash: Option<bitcoin::BlockHash>,
     pub confirmations: Option<u32>,
