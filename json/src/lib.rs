@@ -93,24 +93,26 @@ pub mod serde_bch {
     use serde::{Deserializer, Serializer};
     use std::fmt;
 
-    pub fn serialize<S: Serializer>(
+    pub fn serialize<S>(
         addresses_option: &Option<Vec<BchAddress>>,
-        s: S,
-    ) -> Result<S::Ok, S::Error> {
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         match addresses_option {
             Some(addresses) => {
                 let addresses_str: Vec<String> =
-                    addresses.iter().map(BchAddress::to_string).collect();
+                    addresses.iter().map(|addr| BchAddress::to_string(addr)).collect();
                 let bch_addresses: Vec<String> = addresses_str
                     .iter()
                     .map(|addr| to_legacy(addr).as_deref().unwrap_or_default().to_string())
                     .collect();
 
-                s.serialize_str(&bch_addresses.join(","))
+                serializer.serialize_some(&bch_addresses)
             }
-            None => s.serialize_str(""),
+            None => serializer.serialize_none(),
         }
-        .map_err(S::Error::custom)
     }
 
     pub fn deserialize<'de, D: Deserializer<'de>>(
