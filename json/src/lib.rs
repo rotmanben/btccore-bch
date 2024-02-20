@@ -700,11 +700,14 @@ pub struct GetRawTransactionResultVoutScriptPubKey {
     #[serde(rename = "type")]
     pub type_: Option<ScriptPubkeyType>,
     // Deprecated in Bitcoin Core 22
-    #[serde(with = "serde_bch")]
+    //#[serde(with = "serde_bch")]
+    #[serde(skip_deserializing)]
+    #[serde(skip_serializing)]
     pub addresses: Option<Vec<BchAddress>>,
     // Added in Bitcoin Core 22
-    #[serde(with = "serde_bch_opt")]
-    //#[serde(skip_deserializing)]
+    //#[serde(with = "serde_bch_opt")]
+    #[serde(skip_deserializing)]
+    #[serde(skip_serializing)]
     pub address: Option<BchAddress>,
 }
 
